@@ -11,7 +11,7 @@ Eira Tansey, University of Cincinnati, eira.tansey@uc.edu
 
 # Credit/Citation
 
-RepoData, 2017-2018, Ben Goldman, Eira Tansey, and Whitney Ray. 
+RepoData, 2017-2019, Ben Goldman, Eira Tansey, and Whitney Ray. 
 
 # Access/Use
 
@@ -19,7 +19,7 @@ This data is licensed under ODbL 1.0 license (Open Data Commons Open Database Li
 
 # Date of collection
 
-Data collected and processed between 2017-2018.
+Data collected and processed between 2017-2019.
 
 # Project Website
 
@@ -27,7 +27,7 @@ https://repositorydata.wordpress.com/
 
 # Status
 
-As of November 30, 2018, there are 43 states available, in addition to Washington DC. Additional states will be made available as the data is processed.
+As of January 4, 2019, there are 46 states available, in addition to Washington DC. Additional states will be made available as the data is processed.
 
 # Funding Source
 
