@@ -27,7 +27,7 @@ https://repositorydata.wordpress.com/
 
 # Status
 
-As of January 25, 2019, there are 48 states available, as well as Washington DC. Additional states will be made available as the data is processed.
+As of February 1, 2019, there are 49 states available, as well as Washington DC. Additional states will be made available as the data is processed.
 
 # Funding Source
 
