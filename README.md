@@ -27,11 +27,11 @@ https://repositorydata.wordpress.com/
 
 # Status
 
-As of March 1, 2019, all 50 states available, as well as Washington DC. 
+As of March 1, 2019, all 50 states are now available, as well as Washington DC. 
 
 # Funding Source
 
-This project was supported by a Society of American Archivists Foundation grant awarded in 2017.
+This project was supported by a Society of American Archivists Foundation grant awarded in 2017. Data processing was completed on March 1, 2019. 
 
 # Additional Acknowledgements
 
