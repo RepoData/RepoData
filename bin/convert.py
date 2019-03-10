@@ -17,7 +17,7 @@ root_dir = os.path.split(os.path.split(os.path.realpath(__file__))[0])[0]
 source_dir = os.path.join(root_dir, 'excel')
 
 parser = argparse.ArgumentParser(description='Convert XLSX files to CSV')
-parser.add_argument('-o', '--output', default='all', choices=['csv', 'json', 'geojson'],
+parser.add_argument('-o', '--output', default='all', choices=['csv', 'json'],
                     help='output format', )
 args = parser.parse_args()
 
@@ -31,16 +31,18 @@ class SourceFile():
             wb = openpyxl.load_workbook(self.filepath)
             return wb.active
         except Exception as e:
-            print "Error loading data: {}".format(e)
+            print("Error loading data: {}".format(e))
             return False
 
 
 class DestinationFile():
-    def __init__(self, data):
-        self.data = data
-
     def get_filepath(self, extension):
         return "{}{}".format(os.path.join(root_dir, 'data'), extension)
+
+    def get_key(self, cell):
+        if cell.value:
+            return cell.value.replace("*", "")
+        return ''
 
     def get_value(self, cell):
         if not cell.value:
@@ -50,44 +52,49 @@ class DestinationFile():
                 return int(cell.value)
             return float(cell.value)
         else:
-            return unicode(cell.value)
+            return str(cell.value)
 
     def write_csv(self):
+        print("Creating CSV")
         try:
             destination = self.get_filepath('.csv')
-            with open(destination, 'ab') as f:
+            with open(destination, 'a') as f:
                 c = csv.writer(f)
-                for r in self.data.rows:
-                    new_row = []
-                    for cell in r:
-                        value = unicode(cell.value) if cell.value else ''
-                        new_row.append(value.encode('utf-8'))
-                    if not all('' == s or s.isspace() for s in new_row):
-                        c.writerow(new_row)
-            print "CSV saved"
+                for f in os.listdir(source_dir):
+                    source = SourceFile(os.path.join(source_dir, f))
+                    self.data = source.load_data()
+                    for r in self.data.iter_rows(min_row=2):
+                        new_row = []
+                        for cell in r:
+                            new_row.append(self.get_value(cell) if cell.value else '')
+                        if not all('' == s or s.isspace() for s in new_row):
+                            c.writerow(new_row)
+            print("CSV saved")
         except Exception as e:
-            print "Error creating CSV file: {}".format(e)
+            print("Error creating CSV file: {}".format(e))
 
     def write_json(self):
+        print("Creating JSON")
         try:
             destination = self.get_filepath('.json')
-            rows = list(self.data)
             array = []
-            if os.path.isfile(destination):
-                with open(destination) as json_file:
-                    array = json.load(json_file)
-            for x in range(1, len(rows)):
-                part = {}
-                for n in range(0, 23):
-                    val = self.get_value(rows[x][n])
-                    part[rows[0][n].value.replace("*", "")] = val
-                array.append(part)
-            with open(destination, 'wb') as f:
+            for f in os.listdir(source_dir):
+                source = SourceFile(os.path.join(source_dir, f))
+                self.data = source.load_data()
+                rows = list(self.data)
+                for x in range(1, len(rows)):
+                    part = {}
+                    for n in range(0, 23):
+                        val = self.get_value(rows[x][n])
+                        key = self.get_key(rows[0][n])
+                        part[key] = val
+                    array.append(part)
+            with open(destination, 'w') as f:
                 f.write(json.dumps(array, sort_keys=True, indent=4,
                         separators=(',', ': ')))
-            print "JSON saved"
+            print("JSON saved")
         except Exception as e:
-            print "Error creating JSON file: {}".format(e)
+            print("Error creating JSON file: {}".format(e))
 
     def write_all(self):
         self.write_csv()
@@ -96,9 +103,5 @@ class DestinationFile():
 for f in ['data.csv', 'data.json']:
     if os.path.isfile(os.path.join(root_dir, f)):
         os.remove(os.path.join(root_dir, f))
-for f in os.listdir(source_dir):
-    print "Converting", f
-    source = SourceFile(os.path.join(source_dir, f))
-    data = source.load_data()
-    destination = DestinationFile(data)
-    getattr(destination, 'write_{}'.format(args.output))()
+destination = DestinationFile()
+getattr(destination, 'write_{}'.format(args.output))()
