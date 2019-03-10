@@ -42,6 +42,16 @@ class DestinationFile():
     def get_filepath(self, extension):
         return "{}{}".format(os.path.join(root_dir, 'data'), extension)
 
+    def get_value(self, cell):
+        if not cell.value:
+            return None
+        if cell.data_type == 'n':
+            if float(cell.value).is_integer():
+                return int(cell.value)
+            return float(cell.value)
+        else:
+            return unicode(cell.value)
+
     def write_csv(self):
         try:
             destination = self.get_filepath('.csv')
@@ -61,14 +71,18 @@ class DestinationFile():
     def write_json(self):
         try:
             destination = self.get_filepath('.json')
-            rows = list(data)
+            rows = list(self.data)
             array = []
+            if os.path.isfile(destination):
+                with open(destination) as json_file:
+                    array = json.load(json_file)
             for x in range(1, len(rows)):
                 part = {}
                 for n in range(0, 23):
-                    part[rows[0][n].value.replace("*", "")] = unicode(rows[x][n].value)
+                    val = self.get_value(rows[x][n])
+                    part[rows[0][n].value.replace("*", "")] = val
                 array.append(part)
-            with open(destination, 'ab') as f:
+            with open(destination, 'wb') as f:
                 f.write(json.dumps(array, sort_keys=True, indent=4,
                         separators=(',', ': ')))
             print "JSON saved"
