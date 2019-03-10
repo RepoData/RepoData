@@ -52,7 +52,8 @@ class DestinationFile():
                     for cell in r:
                         value = unicode(cell.value) if cell.value else ''
                         new_row.append(value.encode('utf-8'))
-                    c.writerow(new_row)
+                    if not all('' == s or s.isspace() for s in new_row):
+                        c.writerow(new_row)
             print "CSV saved"
         except Exception as e:
             print "Error creating CSV file: {}".format(e)
