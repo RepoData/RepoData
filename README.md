@@ -1,39 +1,41 @@
-Repository Data (RepoData) for United States Archives
-=================
-# About
+# Repository Data (RepoData) for United States Archives
+
+## About
 
 This repository contains the public-facing data for the RepoData project, an effort to gather a comprehensive data set of US archival repositories. The RepoData project team contacted over 150 archival organizations, and received more than 30,000 data points for archives and institutions with archival records across the United States.
 
-# Contact Information
+## Contact Information
 
-Ben Goldman, Penn State University, bmg17@psu.edu	
+Ben Goldman, Penn State University, bmg17@psu.edu
 Eira Tansey, University of Cincinnati, eira.tansey@uc.edu
 
-# Credit/Citation
+## Credit/Citation
 
-RepoData, 2017-2019, Ben Goldman, Eira Tansey, and Whitney Ray. 
+RepoData, 2017-2019, Ben Goldman, Eira Tansey, and Whitney Ray.
 
-# Access/Use
+## Access/Use
 
-This data is licensed under ODbL 1.0 license (Open Data Commons Open Database License: https://opendatacommons.org/licenses/odbl/summary/) We ask that any re-use of this data acknowledge both RepoData and the original source of individual data points. 
+This data is licensed under ODbL 1.0 license (Open Data Commons Open Database License: https://opendatacommons.org/licenses/odbl/summary/) We ask that any re-use of this data acknowledge both RepoData and the original source of individual data points.
 
-# Date of collection
+All code (located in the `bin` directory) is released under an [MIT License](https://opensource.org/licenses/MIT).
+
+## Date of collection
 
 Data collected and processed between 2017-2019.
 
-# Project Website
+## Project Website
 
-https://repositorydata.wordpress.com/ 
+https://repositorydata.wordpress.com/
 
-# Status
+## Status
 
-As of March 1, 2019, all 50 states are now available, as well as Washington DC. 
+As of March 1, 2019, all 50 states are now available, as well as Washington DC.
 
-# Funding Source
+## Funding Source
 
-This project was supported by a Society of American Archivists Foundation grant awarded in 2017. Data processing was completed on March 1, 2019. 
+This project was supported by a Society of American Archivists Foundation grant awarded in 2017. Data processing was completed on March 1, 2019.
 
-# Additional Acknowledgements
+## Additional Acknowledgements
 
 We would like to thank the following organizations that shared data with us:
 
@@ -43,7 +45,7 @@ We would like to thank the following organizations that shared data with us:
 * Business Archives Section
 * National Library of Medicine
 * National Park Service
-* John Slate and Dave Evans survey of Local Government Repositories 
+* John Slate and Dave Evans survey of Local Government Repositories
 * UT iSchool
 * ASHRAB
 * Northwest Archivists, Inc., Directory
@@ -123,7 +125,7 @@ We would like to thank the following organizations that shared data with us:
 * North Carolina SHRAB
 * Society of North Carolina Archivists
 * North Dakota SHRAB
-* Nebraska State Historical Society (Listed as Nebraska SHRAB on CoSA) 
+* Nebraska State Historical Society (Listed as Nebraska SHRAB on CoSA)
 * New Hampshire Historical Society
 * New Hampshire Archives Group
 * New Hampshire SHRAB
@@ -176,3 +178,35 @@ We would like to thank the following organizations that shared data with us:
 * Wisconsin SHRAB
 * West Virginia Archives and History
 * Wyoming State Archives
+
+## Converting Data
+
+This repository also contains a Python 3 script which converts and combines the individual Excel files into a single CSV and JSON file.
+
+To use this file, first navigate into the `bin` directory:
+
+```
+$ cd bin/
+```
+
+Then, install the required packages:
+
+```
+$ pip install -r requirements.txt
+```
+
+Finally, run the script:
+
+```
+$ python convert.py
+```
+
+### Optional arguments
+
+If desired, you can pass the script an argument if you only want to produce a specific output format:
+
+```
+$ python convert.py -o format
+```
+
+where `format` is the output format. Choices are `csv` and `json`.
