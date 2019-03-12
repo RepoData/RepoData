@@ -58,9 +58,10 @@ class DestinationFile():
         print("Creating CSV")
         try:
             destination = self.get_filepath('.csv')
-            with open(destination, 'a') as f:
-                c = csv.writer(f)
+            with open(destination, 'w') as f:
+                csv_writer = csv.writer(f)
                 for f in os.listdir(source_dir):
+                    print('converting', f)
                     source = SourceFile(os.path.join(source_dir, f))
                     self.data = source.load_data()
                     for r in self.data.iter_rows(min_row=2):
@@ -68,7 +69,7 @@ class DestinationFile():
                         for cell in r:
                             new_row.append(self.get_value(cell) if cell.value else '')
                         if not all('' == s or s.isspace() for s in new_row):
-                            c.writerow(new_row)
+                            csv_writer.writerow(new_row)
             print("CSV saved")
         except Exception as e:
             print("Error creating CSV file: {}".format(e))
@@ -79,6 +80,7 @@ class DestinationFile():
             destination = self.get_filepath('.json')
             array = []
             for f in os.listdir(source_dir):
+                print('converting', f)
                 source = SourceFile(os.path.join(source_dir, f))
                 self.data = source.load_data()
                 rows = list(self.data)
