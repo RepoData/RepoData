@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+""" Ensures all column headers in XSLX files match
+
+    Usage:
+    python check.py
+"""
+
 import csv
 import openpyxl
 
@@ -16,7 +22,7 @@ def check_column_headers():
         sheet = openpyxl.load_workbook(path).active
 
         found = set([c.value for c in next(sheet.iter_rows())])
-        
+
         # assumes first file (AK.xlsx) is canonical
         if expected is None:
             expected = found
@@ -27,4 +33,3 @@ def check_column_headers():
 
 if __name__ == "__main__":
     check_column_headers()
-

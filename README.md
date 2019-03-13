@@ -179,11 +179,15 @@ We would like to thank the following organizations that shared data with us:
 * West Virginia Archives and History
 * Wyoming State Archives
 
-## Converting Data
+## Utilities
 
-This repository also contains a Python 3 script which converts and combines the individual Excel files into a single CSV and JSON file.
+This repository also contains Python 3 utility scripts:
+* `convert.py`, which converts and and combines the individual Excel files into a single CSV and JSON file.
+* `check.py`, which makes sure all the column headers in the Excel files match (this is important because the column headers are used by the JSON serialization).
 
-To use this file, first navigate into the `bin` directory:
+### Usage
+
+To run any of these scripts, first navigate into the `bin` directory:
 
 ```
 $ cd bin/
@@ -200,10 +204,14 @@ Finally, run the script:
 ```
 $ python convert.py
 ```
+or
+```
+$ python check.py
+```
 
-### Optional arguments
+#### Optional arguments for convert.py
 
-If desired, you can pass the script an argument if you only want to produce a specific output format:
+If you want to produce a single output format, you can pass `convert.py` an argument:
 
 ```
 $ python convert.py -o format
