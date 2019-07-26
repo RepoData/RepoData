@@ -90,7 +90,8 @@ class DestinationFile():
                         val = self.get_value(rows[x][n])
                         key = self.get_key(rows[0][n])
                         part[key] = val
-                    array.append(part)
+                    if not all([p[1] is None for p in part.items()]):
+                        array.append(part)
             with open(destination, 'w') as f:
                 f.write(json.dumps(array, sort_keys=True, indent=4,
                         separators=(',', ': ')))
