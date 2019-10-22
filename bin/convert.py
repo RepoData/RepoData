@@ -39,20 +39,22 @@ class DestinationFile():
     def get_filepath(self, extension):
         return "{}{}".format(os.path.join(root_dir, 'data'), extension)
 
+    def handle_zip_code(self, cell):
+        return (str(int(cell.value)).zfill(5) if cell.data_type == 'n' else cell.value.zfill(5))
+
     def get_key(self, cell):
-        if cell.value:
-            return cell.value.replace("*", "")
-        return ''
+        return (cell.value.replace("*", "") if cell.value else '')
 
     def get_value(self, cell):
         if not cell.value:
-            return None
-        if cell.data_type == 'n':
-            if float(cell.value).is_integer():
-                return int(cell.value)
-            return float(cell.value)
+            cell = None
+        elif cell.column == 11:  # zip codes
+            cell = self.handle_zip_code(cell)
+        elif cell.data_type == 'n':  # numeric values
+            cell = int(cell.value) if float(cell.value).is_integer() else float(cell.value)
         else:
-            return str(cell.value)
+            cell = str(cell.value)
+        return cell
 
     def write_csv(self):
         print("Creating CSV")
