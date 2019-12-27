@@ -9,7 +9,7 @@
 import csv
 import shortuuid
 
-from os import listdir
+from os import rename
 from os.path import join, dirname, abspath
 
 source_path = join(abspath(dirname(__file__)), '..', 'data.csv')
@@ -26,6 +26,10 @@ def generate_ids():
         for node, row in enumerate(csvreader, 1):
             identifier = row.get("ID") if row.get("ID") else shortuuid.uuid()
             csvwriter.writerow(dict(row, ID=identifier))
+        source_file.close()
+        out_file.close()
+
+        rename(out_path, source_path)
 
 if __name__ == "__main__":
     generate_ids()
