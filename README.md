@@ -209,12 +209,3 @@ or
 $ python check.py
 ```
 
-#### Optional arguments for convert.py
-
-If you want to produce a single output format, you can pass `convert.py` an argument:
-
-```
-$ python convert.py -o format
-```
-
-where `format` is the output format. Choices are `csv` and `json`.
