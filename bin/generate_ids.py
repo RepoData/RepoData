@@ -17,10 +17,12 @@ out_path = join(abspath(dirname(__file__)), '..', 'data_ids.csv')
 
 shortuuid.set_alphabet("23456789abcdefghijkmnopqrstuvwxyz")
 
+
 def generate_ids():
     with open(source_path, 'r') as source_file, open(out_path, 'w') as out_file:
         csvreader = csv.DictReader(source_file)
-        fieldnames = ['ID'] + csvreader.fieldnames if "ID" not in csvreader.fieldnames else csvreader.fieldnames
+        fieldnames = [
+            'ID'] + csvreader.fieldnames if "ID" not in csvreader.fieldnames else csvreader.fieldnames
         csvwriter = csv.DictWriter(out_file, fieldnames, extrasaction='ignore')
         csvwriter.writeheader()
         for node, row in enumerate(csvreader, 1):
@@ -30,6 +32,7 @@ def generate_ids():
         out_file.close()
 
         rename(out_path, source_path)
+
 
 if __name__ == "__main__":
     generate_ids()
