@@ -22,11 +22,11 @@ def generate_ids():
     with open(source_path, 'r') as source_file, open(out_path, 'w') as out_file:
         csvreader = csv.DictReader(source_file)
         fieldnames = [
-            'ID'] + csvreader.fieldnames if "ID" not in csvreader.fieldnames else csvreader.fieldnames
+            'id'] + csvreader.fieldnames if "id" not in csvreader.fieldnames else csvreader.fieldnames
         csvwriter = csv.DictWriter(out_file, fieldnames, extrasaction='ignore')
         csvwriter.writeheader()
         for node, row in enumerate(csvreader, 1):
-            identifier = row.get("ID") if row.get("ID") else shortuuid.uuid()
+            identifier = row.get("id") if row.get("id") else shortuuid.uuid()
             csvwriter.writerow(dict(row, ID=identifier))
         source_file.close()
         out_file.close()
