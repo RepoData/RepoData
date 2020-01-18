@@ -37,7 +37,9 @@ This project was supported by a Society of American Archivists Foundation grant 
 
 ## Additional Acknowledgements
 
-We would like to thank the following organizations that shared data with us:
+We are greatly indebted to Hillel Arnold and Ed Summers for their continued advisement on data maintenance and contributions to this repository.
+
+We would also like to thank the following organizations that shared data with us:
 
 * Archivists for Congregations of Women Religious
 * National Association of Government Archivists and Records Administrators
