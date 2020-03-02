@@ -15,7 +15,7 @@ for repo in repos:
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": [repo["latitude"], repo["longitude"]]
+                "coordinates": [repo["longitude"], repo["latitude"]]
             },
             "properties": repo
         })
