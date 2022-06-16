@@ -8,7 +8,7 @@ def convert():
     repos = []
     for row in csv.DictReader(open('data.csv')):
         repos.append(filter_row(row))
-    json.dump(repos, open('data.json', 'w'), indent=2, default=str)
+    json.dump(repos, open('data.json', 'w'), indent=2)
 
 def filter_row(row):
     """Filters row data.
@@ -25,7 +25,8 @@ def coerce_type(value, key):
     elif key in ["latitude", "longitude", "geocode_confidence"]:
         return float(value)
     elif key == "date_entry_recorded":
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
+        return parsed.isoformat()
     else:
         return value
 
