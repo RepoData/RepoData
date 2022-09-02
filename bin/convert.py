@@ -28,6 +28,7 @@ def create_geojson():
         "features": []
     }
     for repo in csv.DictReader(open(source_path)):
+        repo = filter_row(repo)
         if repo['latitude'] and repo['longitude']:
             geojson['features'].append({
                 "type": "Feature",
@@ -35,7 +36,7 @@ def create_geojson():
                     "type": "Point",
                     "coordinates": [repo["longitude"], repo["latitude"]]
                 },
-                "properties": filter_row(repo)
+                "properties": repo
             })
     json.dump(geojson, open(geojson_path, 'w'), indent=2)
 

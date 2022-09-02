@@ -26,7 +26,8 @@ def generate_ids():
         csvwriter.writeheader()
         for node, row in enumerate(csvreader, 1):
             identifier = row.get("id") if row.get("id") else shortuuid.uuid()
-            csvwriter.writerow(dict(row, ID=identifier))
+            row['id'] = identifier
+            csvwriter.writerow(row)
         source_file.close()
         out_file.close()
 
