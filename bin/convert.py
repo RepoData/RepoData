@@ -1,14 +1,44 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import csv
-from datetime import datetime
 import json
 
+from datetime import datetime
+from os.path import join, dirname, abspath
+
+source_path = join(abspath(dirname(__file__)), '..', 'data.csv')
+json_path = join(abspath(dirname(__file__)), '..', 'data.json')
+geojson_path = join(abspath(dirname(__file__)), '..', 'data.geojson')
+
 def convert():
+    create_json()
+    create_geojson()
+
+def create_json():
+    """Dumps JSON representation of each row of `data.csv` to `data.json`."""
     repos = []
-    for row in csv.DictReader(open('data.csv')):
+    for row in csv.DictReader(open(source_path)):
         repos.append(filter_row(row))
-    json.dump(repos, open('data.json', 'w'), indent=2)
+    json.dump(repos, open(json_path, 'w'), indent=2)
+
+def create_geojson():
+    """Creates a GeoJSON FeatureCollection for all repositories in `data.csv`."""
+    geojson = {
+        "type": "FeatureCollection",
+        "features": []
+    }
+    for repo in csv.DictReader(open(source_path)):
+        if repo['latitude'] and repo['longitude']:
+            geojson['features'].append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [repo["longitude"], repo["latitude"]]
+                },
+                "properties": filter_row(repo)
+            })
+    json.dump(geojson, open(geojson_path, 'w'), indent=2)
+
 
 def filter_row(row):
     """Filters row data.

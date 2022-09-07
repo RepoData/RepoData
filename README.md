@@ -184,8 +184,11 @@ We would also like to thank the following organizations that shared data with us
 ## Utilities
 
 This repository also contains Python 3 utility scripts:
-* `convert.py`, which converts and and combines the individual Excel files into a single CSV and JSON file.
+* `convert.py`, which creates JSON and GeoJSON derivatives from the main CSV file.
 * `check.py`, which makes sure all the column headers in the Excel files match (this is important because the column headers are used by the JSON serialization).
+* `generate_ids`, which generates unique identifiers for all repositories in a source CSV file.
+* `geocode.py`, which adds geocoding data exported from ArcGIS to the main CSV file.
+* `trim_rows`, which ensures that all rows in the source CSV are the same length.
 
 ### Usage
 
