@@ -1,1 +1,1 @@
-openpyxl==2.5.4
+shortuuid==1.0.9
