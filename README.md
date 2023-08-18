@@ -192,7 +192,7 @@ This repository also contains Python 3 utility scripts:
 
 ### Usage
 
-To run any of the utilities, you will need to [install Poetry](https://python-poetry.org/docs/#installation) and then use `poetry run` to run the programs.
+To run any of the utilities, you will need to [install Poetry](https://python-poetry.org/docs/#installation) and then install dependencies using `poetry install`. After that, you can use `poetry run` to run the programs.
 
 ### Convert to JSON and GeoJSON
 
