@@ -294,11 +294,18 @@ Press *ENTER* to return to editing.
             else:
                 row = [prop]
                 for rec in recs:
+
+                    # highlight the cell if it was the last edit
                     if last_edit is not None and last_edit[0] == rec.name and last_edit[1] == col:
                         reverse = True
                     else:
                         reverse = False
-                    row.append(Text(str(rec[col]), style=Style(reverse=reverse)))
+
+                    # make into a clickable link if it looks like a URL
+                    text = str(rec[col])
+                    link = text if text.startswith('http') else None
+
+                    row.append(Text(text, style=Style(reverse=reverse, link=link)))
                 table.add_row(*row)
 
         return table
