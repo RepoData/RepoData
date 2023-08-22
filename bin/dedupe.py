@@ -19,6 +19,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
 from rich.text import Text
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.style import Style
 
 from os.path import abspath, dirname, join
 
@@ -151,9 +154,11 @@ class DupeMediator:
         text.append("S)", style="bold")
         text.append("ave  ")
 
-
         text.append("Q)", style="bold")
-        text.append("uit")
+        text.append("uit  ")
+
+        text.append("H)", style="bold")
+        text.append("elp")
 
         # calculate spaces needed for centering the prompt
         spaces = " " * int((self.console.size[0] - len(text)) / 2)
@@ -180,6 +185,8 @@ class DupeMediator:
             self.save()
         elif cmd == "n" or cmd == "":
             self.next()
+        elif cmd == "h":
+            self.help()
 
     def previous(self):
         self.pos -= 1
@@ -199,7 +206,7 @@ class DupeMediator:
             rec_id, prop_name, old_val = edit
             self.df.at[rec_id, prop_name] = old_val
         else:
-            print(edit)
+            # add the old record back by concatenating to the end of the dataframe
             self.df = pandas.concat([self.df, pandas.DataFrame([edit])])
 
     def quit(self):
@@ -220,8 +227,48 @@ class DupeMediator:
         self.edits.append(rec)
         self.df = self.df.drop(rec_id)
 
-    def edit(self, from_rec, to_rec):
-        pass
+    def help(self):
+        self.console.clear()
+        help_text = Markdown(
+"""
+Here are the available commands:
+
+**N**
+: Move to the *next* set of duplicate records.
+
+**P**
+: Move to the *previous* set of duplicate records.
+
+**D**
+: *Delete* a record identified by its number. For example `D 2`.
+
+**U**
+: *Undo* the last change.
+
+**M** 
+: *Move* a property value from one record to another using the number of the property, and a comma separated list of of the record number to copy from and to. For example to move the value of property 8 from record 2 to record 1: `M 8 2,1`.
+
+**S**
+: *Save* the state of the dataset as *data.csv*.
+
+**Q**
+: *Quit* without saving changes.
+
+**H**
+: View this *help* documentation!
+
+Press *ENTER* to return to editing.
+"""
+        )
+        self.console.print(
+            Panel(
+                help_text,
+                padding=(2, 10),
+                title="Dedupe Help",
+                highlight=True
+            )
+        )
+        Prompt.ask()
 
     def make_table(self):
         recs = []
@@ -233,7 +280,10 @@ class DupeMediator:
         col_width = int((self.console.size[0] - 40) / len(recs))
         for i in range(1, len(recs) + 1):
             table.add_column(Text.assemble("Record ", (str(i), "italic")), width=col_width)
-       
+      
+        # get the last edit if we have edits and the last edit moved a value (not a delete)
+        last_edit = self.edits[-1] if len(self.edits) > 0 and type(self.edits[-1]) == tuple else None
+
         count = 0
         for col, col_spec in self.columns:
             count += 1
@@ -242,7 +292,14 @@ class DupeMediator:
             if col == "id":
                 table.add_row(prop, *[rec.name for rec in recs])
             else:
-                table.add_row(prop, *[str(rec[col]) for rec in recs])
+                row = [prop]
+                for rec in recs:
+                    if last_edit is not None and last_edit[0] == rec.name and last_edit[1] == col:
+                        reverse = True
+                    else:
+                        reverse = False
+                    row.append(Text(str(rec[col]), style=Style(reverse=reverse)))
+                table.add_row(*row)
 
         return table
 
