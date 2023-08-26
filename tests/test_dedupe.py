@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime
 
 from numpy import isnan
 
@@ -57,9 +58,11 @@ def test_copy():
     """Test copying some properties from one record to another then undoing it."""
     mediator = DupeMediator(example_csv, DupeAnalyzer(example_csv).get_dupes())
 
+    # currently latitude and longitude are not set for this record
     assert isnan(mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].latitude)
     assert isnan(mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].longitude)
 
+    # copy them from a record where they are defined
     mediator.copy(
         "latitude", "22ygfe9fkgvzd2m6qxrs4r7rj5", "222vbsyz44jadgb2rcqyu5ibu3"
     )
@@ -67,11 +70,29 @@ def test_copy():
         "longitude", "22ygfe9fkgvzd2m6qxrs4r7rj5", "222vbsyz44jadgb2rcqyu5ibu3"
     )
 
+    # make sure they are there
     assert mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].latitude == 41.6090744738
     assert mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].longitude == -88.2036374157
 
+    # undo them and make sure they go back to their prervious value
     mediator.undo()
     assert isnan(mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].longitude)
-
     mediator.undo()
     assert isnan(mediator.df.loc["222vbsyz44jadgb2rcqyu5ibu3"].latitude)
+
+def test_updated():
+    """Editing a record should cause it to get a new date_entry_updated."""
+    now = datetime.now()
+    mediator = DupeMediator(example_csv, DupeAnalyzer(example_csv).get_dupes())
+    mediator.copy(
+        "latitude", "22ygfe9fkgvzd2m6qxrs4r7rj5", "222vbsyz44jadgb2rcqyu5ibu3"
+    )
+    mediator.next()
+    assert mediator.df.loc['222vbsyz44jadgb2rcqyu5ibu3'].date_entry_updated > now
+
+def test_save():
+    """Saving the data with no edits should result in exact copy of the original."""
+    mediator = DupeMediator(example_csv, [])
+    copy_csv = example_csv.parent / "copy.csv"
+    mediator.save(copy_csv)
+    assert copy_csv.open().read() == example_csv.open().read()

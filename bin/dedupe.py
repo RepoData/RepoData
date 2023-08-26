@@ -13,6 +13,7 @@ by that person.
 import re
 import pandas
 import argparse
+import datetime
 import rich.box
 
 from rich.console import Console
@@ -26,7 +27,7 @@ from rich.style import Style
 from os.path import abspath, dirname, join
 
 # source data
-source_path = join(abspath(dirname(__file__)), "..", "data.csv")
+CSV_FILE = join(abspath(dirname(__file__)), "..", "data.csv")
 
 
 def main():
@@ -43,9 +44,9 @@ def main():
     )
     args = parser.parse_args()
 
-    analyzer = DupeAnalyzer(source_path, args.entry_recorded_by, args.no_pobox)
+    analyzer = DupeAnalyzer(CSV_FILE, args.entry_recorded_by, args.no_pobox)
     dupes = analyzer.get_dupes()
-    mediator = DupeMediator(source_path, dupes)
+    mediator = DupeMediator(CSV_FILE, dupes)
     mediator.run()
 
 
@@ -132,13 +133,14 @@ class DupeMediator:
         "url_of_source_of_repository_data",
         "geocode_confidence",
         "notes",
+        "date_entry_updated",
     ]
 
     def __init__(self, csv_path, dupes):
         self.dupes = dupes
         self.pos = 0
         self.edits = []
-        self.df = pandas.read_csv(csv_path, index_col="id")
+        self.df = pandas.read_csv(csv_path, index_col="id", parse_dates=['date_entry_recorded', 'date_entry_updated'])
         self.console = Console()
 
     @property
@@ -214,6 +216,10 @@ class DupeMediator:
 
     def next(self):
         self.pos += 1
+        # mark any updated records with a new timestamp
+        for edit in self.edits:
+            if type(edit) == tuple:
+                self.df.loc[edit[0]] = datetime.datetime.now()
         self.edits = []
 
     def undo(self):
@@ -232,17 +238,19 @@ class DupeMediator:
     def quit(self):
         self.pos = len(self.dupes)
 
-    def save(self):
+    def save(self, csv_file=CSV_FILE):
         self.df = self.df.sort_index()
-        self.df.to_csv("data.csv", lineterminator="\r\n")
+        self.df.to_csv(csv_file, lineterminator="\r\n", date_format='%Y-%m-%d %H:%M:%S')
 
     def copy(self, prop_name, from_rec_id, to_rec_id):
         old_val = self.df.at[to_rec_id, prop_name]
+        # push the record, property and old value onto the edit stack for undo 
         self.edits.append((to_rec_id, prop_name, old_val))
         self.df.at[to_rec_id, prop_name] = self.df.loc[from_rec_id][prop_name]
 
     def delete(self, rec_id):
         rec = self.df.loc[rec_id].copy()
+        # push the record onto the edit stack
         self.edits.append(rec)
         self.df = self.df.drop(rec_id)
 

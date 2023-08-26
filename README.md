@@ -208,7 +208,7 @@ $ poetry run python bin/convert.py
 
 ### Deduplicate
 
-If you would like to deduplicate the dataset you can:
+When integrating new records into the main dataset it can be important to deduplicate entries. The `dedupe.py` utility is helpful for identifying these and for folding the data together when the new records have additional information that the older entries does not.
 
 ```
 $ poetry run bin/dedupe.py
