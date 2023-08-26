@@ -1,5 +1,8 @@
 # Repository Data (RepoData) for United States Archives
 
+[![Build Status](https://github.com/RepoData/RepoData/actions/workflows/test.yml/badge.svg)](https://github.com/RepoData/RepoData/actions/workflows/test.yml)
+
+
 ## About
 
 This repository contains the public-facing data for the RepoData project, an effort to gather a comprehensive data set of US archival repositories. The RepoData project team contacted over 150 archival organizations, and received more than 30,000 data points for archives and institutions with archival records across the United States.

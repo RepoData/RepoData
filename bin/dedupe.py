@@ -26,21 +26,26 @@ from rich.style import Style
 from os.path import abspath, dirname, join
 
 # source data
-source_path = join(abspath(dirname(__file__)), '..', 'data.csv')
+source_path = join(abspath(dirname(__file__)), "..", "data.csv")
+
 
 def main():
     parser = argparse.ArgumentParser(
-        prog='dedupe',
-        description='A utility to help de-duplicate source CSV data'
+        prog="dedupe", description="A utility to help de-duplicate source CSV data"
     )
-    parser.add_argument('--entry-recorded-by', help='Name of the person who entered the record')
-    parser.add_argument('--no-pobox', action='store_true', help='Ignore duplicates involving PO Box addresses')
-    parser.add_argument('--min', type=int, default=0, help='Only display duplicates with >= n')
+    parser.add_argument(
+        "--entry-recorded-by", help="Name of the person who entered the record"
+    )
+    parser.add_argument(
+        "--no-pobox",
+        action="store_true",
+        help="Ignore duplicates involving PO Box addresses",
+    )
     args = parser.parse_args()
 
-    analyzer = DupeAnalyzer(args.entry_recorded_by, args.no_pobox, args.min)
+    analyzer = DupeAnalyzer(source_path, args.entry_recorded_by, args.no_pobox)
     dupes = analyzer.get_dupes()
-    mediator = DupeMediator(dupes)
+    mediator = DupeMediator(source_path, dupes)
     mediator.run()
 
 
@@ -51,80 +56,95 @@ class DupeAnalyzer:
     the options all over the place.
     """
 
-    def __init__(self, entry_recorded_by=None, no_pobox=False, dupe_min=0):
+    def __init__(self, csv_path, entry_recorded_by=None, no_pobox=False):
         self.entry_recorded_by = entry_recorded_by
         self.no_pobox = no_pobox
-        self.dupe_min = dupe_min
-        self.df = pandas.read_csv(source_path)
+        self.df = pandas.read_csv(csv_path)
 
     def get_dupes(self):
         dupes_found = []
 
-        # records with overlapping name, city and state are potential dupes
-        dupes = self.df.set_index(['repository_name_unauthorized', 'st_city', 'state']).copy()
-        dupes = dupes.dropna(axis=0, subset='street_address_1')
-        dupes = dupes.sort_index()
+        # reorganize the dataframe with the name, city and state as the index,
+        # which will group together records where they are the same
+        # note: the resulting dataframe is copied so we don't interfere with the original
+        dupes = self.df.set_index(
+            ["repository_name_unauthorized", "st_city", "state"]
+        ).copy()
 
-        # filter out pobox addresses if we want to ignore them. 
-        # note: previous discussion has identified a need to retain both records
-        # when one is a PO Box
+        # if there is no street address we can't evaluate it
+        dupes = dupes.dropna(axis=0, subset="street_address_1")
+
+        # filter out pobox addresses if we want to ignore them
+        # note: previous discussion has identified a need to retain both types of records
         if self.no_pobox:
-            dupes = dupes[~dupes.street_address_1.str.match(r'(PO Box)|(P.? ?O.? Box)|(Box)', case=False)]
+            dupes = dupes[
+                ~dupes.street_address_1.str.match(
+                    r"(PO Box)|(P.? ?O.? Box)|(Box)", case=False
+                )
+            ]
 
+        # walk through the groups of duplicates and get the append the record identifiers to a list
+        dupes = dupes.sort_index()
         for index_val in dupes.index.unique():
             records = dupes.loc[index_val]
 
+            # only consider duplicates if one of the records was provided by user
             if self.entry_recorded_by:
-                if len(records[records.entry_recorded_by == self.entry_recorded_by]) == 0:
+                if (
+                    len(records[records.entry_recorded_by == self.entry_recorded_by])
+                    == 0
+                ):
                     continue
 
-            if len(records) > 1 and len(records) > self.dupe_min:
-                dupes_found.append([rec.id for rec in records.itertuples()])
+            # if the group of records is more than one we have some duplicates
+            # sort them to make testing possible
+            if len(records) > 1:
+                dupes_found.append(sorted([rec.id for rec in records.itertuples()]))
 
-        return dupes_found
+        # return the list of duplicates sorting using the first duplicate id for testing
+        return sorted(dupes_found, key=lambda dupe: dupe[0])
 
 
 class DupeMediator:
-
     columns = [
-        ("id",                               "ignore"), 
-        ("repository_name_unauthorized",     "merge"),
-        ("name_notes",                       "merge"),
-        ("parent_org_unauthorized",          "merge"),
-        ("repository_name_authorized",       "merge"),
-        ("repository_identifier_authorized", "merge"),
-        ("repository_type",                  "merge"),
-        ("location_type",                    "merge"),
-        ("street_address_1",                 "merge"),
-        ("street_address_2",                 "merge"),
-        ("st_city",                          "merge"),
-        ("st_zip_code_5_numbers",            "merge"),
-        ("st_zip_code_4_following_numbers",  "merge"),
-        ("street_address_county",            "merge"),
-        ("state",                            "merge"),
-        ("url",                              "merge"),
-        ("latitude",                         "merge"),
-        ("longitude",                        "merge"),
-        ("language_of_entry",                "merge"),
-        ("date_entry_recorded",              "ignore"),
-        ("entry_recorded_by",                "add"),
-        ("source_of_repository_data",        "add"),
-        ("url_of_source_of_repository_data", "merge"),
-        ("geocode_confidence",               "merge"),
-        ("notes",                            "append"),
+        "id",
+        "repository_name_unauthorized",
+        "name_notes",
+        "parent_org_unauthorized",
+        "repository_name_authorized",
+        "repository_identifier_authorized",
+        "repository_type",
+        "location_type",
+        "street_address_1",
+        "street_address_2",
+        "st_city",
+        "st_zip_code_5_numbers",
+        "st_zip_code_4_following_numbers",
+        "street_address_county",
+        "state",
+        "url",
+        "latitude",
+        "longitude",
+        "language_of_entry",
+        "date_entry_recorded",
+        "entry_recorded_by",
+        "source_of_repository_data",
+        "url_of_source_of_repository_data",
+        "geocode_confidence",
+        "notes",
     ]
 
-    def __init__(self, dupes):
+    def __init__(self, csv_path, dupes):
         self.dupes = dupes
         self.pos = 0
         self.edits = []
-        self.df = pandas.read_csv(source_path, index_col='id')
+        self.df = pandas.read_csv(csv_path, index_col="id")
         self.console = Console()
 
     @property
     def current_dupe(self):
         return self.dupes[self.pos]
-    
+
     def run(self):
         while self.pos < len(self.dupes):
             # hydrate the record ids back into records
@@ -170,7 +190,7 @@ class DupeMediator:
             prop = self.columns[prop - 1]
             from_rec = self.current_dupe[from_rec - 1]
             to_rec = self.current_dupe[to_rec - 1]
-            self.edit_property(prop, from_rec, to_rec)
+            self.copy(prop, from_rec, to_rec)
         elif m := re.match(r"^d (\d+)", cmd):
             rec = int(m.group(1)) - 1
             rec = self.current_dupe[rec]
@@ -214,10 +234,9 @@ class DupeMediator:
 
     def save(self):
         self.df = self.df.sort_index()
-        self.df.to_csv('data.csv', lineterminator='\r\n')
+        self.df.to_csv("data.csv", lineterminator="\r\n")
 
-    def edit_property(self, prop, from_rec_id, to_rec_id):
-        prop_name, prop_spec = prop
+    def copy(self, prop_name, from_rec_id, to_rec_id):
         old_val = self.df.at[to_rec_id, prop_name]
         self.edits.append((to_rec_id, prop_name, old_val))
         self.df.at[to_rec_id, prop_name] = self.df.loc[from_rec_id][prop_name]
@@ -230,7 +249,7 @@ class DupeMediator:
     def help(self):
         self.console.clear()
         help_text = Markdown(
-"""
+            """
 Here are the available commands:
 
 **N**
@@ -261,12 +280,7 @@ Press *ENTER* to return to editing.
 """
         )
         self.console.print(
-            Panel(
-                help_text,
-                padding=(2, 10),
-                title="Dedupe Help",
-                highlight=True
-            )
+            Panel(help_text, padding=(2, 10), title="Dedupe Help", highlight=True)
         )
         Prompt.ask()
 
@@ -276,16 +290,22 @@ Press *ENTER* to return to editing.
             if rec_id in self.df.index:
                 recs.append(self.df.loc[rec_id])
         table = Table(box=rich.box.ROUNDED, width=self.console.size[0])
-        table.add_column('Property', width=40)
+        table.add_column("Property", width=40)
         col_width = int((self.console.size[0] - 40) / len(recs))
         for i in range(1, len(recs) + 1):
-            table.add_column(Text.assemble("Record ", (str(i), "italic")), width=col_width)
-      
+            table.add_column(
+                Text.assemble("Record ", (str(i), "italic")), width=col_width
+            )
+
         # get the last edit if we have edits and the last edit moved a value (not a delete)
-        last_edit = self.edits[-1] if len(self.edits) > 0 and type(self.edits[-1]) == tuple else None
+        last_edit = (
+            self.edits[-1]
+            if len(self.edits) > 0 and type(self.edits[-1]) == tuple
+            else None
+        )
 
         count = 0
-        for col, col_spec in self.columns:
+        for col in self.columns:
             count += 1
             prop = Text.assemble((f"{count:2d}", "italic"), f" {col}")
 
@@ -294,16 +314,19 @@ Press *ENTER* to return to editing.
             else:
                 row = [prop]
                 for rec in recs:
-
                     # highlight the cell if it was the last edit
-                    if last_edit is not None and last_edit[0] == rec.name and last_edit[1] == col:
+                    if (
+                        last_edit is not None
+                        and last_edit[0] == rec.name
+                        and last_edit[1] == col
+                    ):
                         reverse = True
                     else:
                         reverse = False
 
                     # make into a clickable link if it looks like a URL
                     text = str(rec[col])
-                    link = text if text.startswith('http') else None
+                    link = text if text.startswith("http") else None
 
                     row.append(Text(text, style=Style(reverse=reverse, link=link)))
                 table.add_row(*row)
