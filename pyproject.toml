@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "repodata"
+version = "1.1.0"
+description = "A comprehensive data set of archival repositories in the United States"
+authors = ["Your Name <you@example.com>"]
+license = "Open Data Commons Open Database License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+shortuuid = "^1.0.11"
+pandas = "^2.0.3"
+openpyxl = "^3.1.2"
+rich = "^13.5.2"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

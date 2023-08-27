@@ -1,5 +1,8 @@
 # Repository Data (RepoData) for United States Archives
 
+[![Build Status](https://github.com/RepoData/RepoData/actions/workflows/test.yml/badge.svg)](https://github.com/RepoData/RepoData/actions/workflows/test.yml)
+
+
 ## About
 
 This repository contains the public-facing data for the RepoData project, an effort to gather a comprehensive data set of US archival repositories. The RepoData project team contacted over 150 archival organizations, and received more than 30,000 data points for archives and institutions with archival records across the United States.
@@ -192,34 +195,38 @@ This repository also contains Python 3 utility scripts:
 
 ### Usage
 
-To run any of these scripts, first navigate into the `bin` directory:
+To run any of the utilities, you will need to [install Poetry](https://python-poetry.org/docs/#installation) and then install dependencies using `poetry install`. After that, you can use `poetry run` to run the programs.
+
+### Convert to JSON and GeoJSON
+
+After changes are made to `data.csv` it is necessary to rerun the conversion to JSON and GeoJSON:
+
 
 ```
-$ cd bin/
+$ poetry run python bin/convert.py
 ```
 
-Then, install the required packages:
+### Deduplicate
+
+When integrating new records into the main dataset it can be important to deduplicate entries. The `dedupe.py` utility is helpful for identifying these and for folding the data together when the new records have additional information that the older entries does not.
 
 ```
-$ pip install -r requirements.txt
+$ poetry run bin/dedupe.py
 ```
 
-Finally, run the script:
+This will look for duplicates where a duplicate is any record that has the same *name*, *city* and *state*. If you would only like to deduplicate records from a particular user you can:
 
 ```
-$ python convert.py
-```
-or
-```
-$ python check.py
+$ poetry run bin/dedupe.py --entry-recorded-by 'Charlie Macquarie'
 ```
 
-#### Optional arguments for convert.py
-
-If you want to produce a single output format, you can pass `convert.py` an argument:
+If you would like to ignore duplicates that are the result of records for a single institution where one is a PO Box and the other is not you can use the `--no-pobox` option:
 
 ```
-$ python convert.py -o format
+$ poetry run bin/dedupe.py --no-pobox
 ```
 
-where `format` is the output format. Choices are `csv` and `json`.
+The interface for editing allows you to step through the duplicates, delete one or more records, and move values from one record to another.
+
+<a href="https://raw.githubusercontent.com/RepoData/RepoData/t34-dedupe/images/dedupe-screenshot.png"><img src="https://raw.githubusercontent.com/RepoData/RepoData/t34-dedupe/images/dedupe-screenshot.png"></a>
+
