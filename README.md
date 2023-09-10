@@ -228,5 +228,5 @@ $ poetry run bin/dedupe.py --no-pobox
 
 The interface for editing allows you to step through the duplicates, delete one or more records, and move values from one record to another.
 
-<a href="https://raw.githubusercontent.com/RepoData/RepoData/t34-dedupe/images/dedupe-screenshot.png"><img src="https://raw.githubusercontent.com/RepoData/RepoData/t34-dedupe/images/dedupe-screenshot.png"></a>
+<a href="https://raw.githubusercontent.com/RepoData/RepoData/main/images/dedupe-screenshot.png"><img src="https://raw.githubusercontent.com/RepoData/RepoData/main/images/dedupe-screenshot.png"></a>
 
