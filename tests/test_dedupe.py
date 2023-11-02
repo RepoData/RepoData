@@ -93,6 +93,6 @@ def test_updated():
 def test_save():
     """Saving the data with no edits should result in exact copy of the original."""
     mediator = DupeMediator(example_csv, [])
-    copy_csv = example_csv.parent / "copy.csv"
+    copy_csv = example_csv.parent / "temp" / "copy.csv"
     mediator.save(copy_csv)
     assert copy_csv.open().read() == example_csv.open().read()

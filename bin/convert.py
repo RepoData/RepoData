@@ -14,14 +14,14 @@ def convert():
     create_json()
     create_geojson()
 
-def create_json():
+def create_json(json_path=json_path):
     """Dumps JSON representation of each row of `data.csv` to `data.json`."""
     repos = []
     for row in csv.DictReader(open(source_path)):
         repos.append(filter_row(row))
     json.dump(repos, open(json_path, 'w'), indent=2)
 
-def create_geojson():
+def create_geojson(geojson_path=geojson_path):
     """Creates a GeoJSON FeatureCollection for all repositories in `data.csv`."""
     geojson = {
         "type": "FeatureCollection",

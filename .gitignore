@@ -2,4 +2,4 @@
 __pycache__
 
 # created during testing
-tests/data/copy.csv
+tests/data/temp/
